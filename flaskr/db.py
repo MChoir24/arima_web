@@ -1,6 +1,4 @@
 import click
-import os
-import pymysql
 import mysql.connector
 # from click.termui import clear
 from flask.cli import with_appcontext
@@ -13,28 +11,6 @@ def get_db():
     get database
     """
     if 'db' not in g:
-        # current_app.config['MYSQL_DATABASE_HOST'] = "127.0.0.1"
-        # current_app.config['MYSQL_DATABASE_PORT'] = 6033
-        # current_app.config['MYSQL_DATABASE_USER'] = "root"
-        # current_app.config['MYSQL_DATABASE_PASSWORD'] = "root"
-        # current_app.config['MYSQL_DATABASE_DB'] = "arima"
-
-        # mysql = MySQL()
-        # print(current_app)
-        # mysql.init_app(current_app.config['DATABASE'])
-
-        # mysql = MySQL(
-        #     current_app.config['DATABASE'], 
-        #     prefix='mysql', 
-        #     host=os.getenv("localhost"), 
-        #     port=6033,
-        #     user=os.getenv("root"),
-        #     password=os.getenv("root"),
-        #     db=os.getenv("arima"), 
-        #     autocommit=True, 
-        #     cursorclass=pymysql.cursors.DictCursor
-        # )
-
         mydb = mysql.connector.connect(
                             host="localhost",
                             port=6033,
@@ -61,7 +37,7 @@ def init_db():
     """
     db = get_db()
 
-    executeScriptsFromFile(db.cursor(), "schema.sql")
+    executeScriptsFromFile(db.cursor(), "schema2.sql")
     # with current_app.open_resource('schema.sql') as f:
     #     db.executescript(f.read().decode('utf8'))
 

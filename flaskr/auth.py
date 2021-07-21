@@ -1,15 +1,32 @@
 import functools
+from os import error
 
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
 from werkzeug.security import check_password_hash, generate_password_hash
-
 from flaskr.db import get_db
+from flaskr.admin import create_user
+
+def login_required(user_types=['user']):
+    def decor(view):
+        @functools.wraps(view)
+        def wrapped_view(**kwargs):
+            session['request_url'] = request.url
+            # print(request.url)
+            if g.user is None:
+                return redirect(url_for('auth.login'))
+            elif g.user['type'] not in user_types:
+                return redirect(url_for('blog.index'))
+            return view(**kwargs)
+        return wrapped_view
+    return decor
+
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 @bp.route('/register', methods=('GET', 'POST'))
+@login_required(user_types=['admin'])
 def register():
     """
     register
@@ -17,30 +34,14 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        db = get_db()
-        cur = db.cursor()
-        error = None
+        lvl = 0
+        error = create_user(username, password, str(lvl))
         
-        cur.execute(
-            'SELECT id FROM user WHERE username = %s', (username,)
-        )
-
-        if not username:
-            error = 'Username is required.'
-        elif not password:
-            error = 'Password is required.'
-        elif cur.fetchone() is not None:
-            error = f'User {username} is already registered.'
-
         if error is None:
-            cur.execute(
-                'INSERT INTO user (username, password) VALUES (%s, %s)',
-                (username, generate_password_hash(password))
-            )
-            db.commit()
             return redirect(url_for('auth.login'))
+        else:
+            flash(error)
     
-        flash(error)
     return render_template('auth/register.html')
 
 @bp.route('/login', methods=('GET', 'POST'))
@@ -64,16 +65,27 @@ def login():
             error = 'Incorrect password.'
 
         if error is None:
+            request_url = session.get('request_url', None)
+            print('cobbaa= ',request_url)
             session.clear()
             session['user_id'] = user[0]
-            return redirect(url_for('index'))
+            if request_url:
+                return redirect(request_url)
+            else:
+                return redirect(url_for('index'))
 
         flash(error)
+        return render_template('auth/login.html')
     elif request.method == 'GET':
         if g.user is None:
             return render_template('auth/login.html')
         else:
             return redirect(url_for('index'))
+
+@bp.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
 
 @bp.before_app_request
 def load_logged_in_user():
@@ -84,20 +96,14 @@ def load_logged_in_user():
     else:
         cur = get_db().cursor()
         cur.execute(
-            'SELECT * FROM user WHERE id = %s', (user_id,)
+            'SELECT user.id, user.username, user_type.type_name'
+            ' FROM `user` INNER JOIN user_type '
+            ' ON user.id_type=user_type.id_type'
+            ' WHERE user.id=%s', 
+            (user_id,)
         )
-        g.user = cur.fetchone()
-
-@bp.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('index'))
-
-def login_required(view):
-    @functools.wraps(view)
-    def wrapped_view(**kwargs):
-        if g.user is None:
-            return redirect(url_for('auth.login'))
-
-        return view(**kwargs)
-    return wrapped_view
+        temp = cur.fetchone()
+        g.user = {}
+        g.user['id'] = temp[0]
+        g.user['name'] = temp[1]
+        g.user['type'] = temp[2]
