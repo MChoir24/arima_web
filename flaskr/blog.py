@@ -1,15 +1,17 @@
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, url_for
+    Blueprint, flash, g, redirect, render_template, request, url_for, jsonify
 )
 from flask.globals import current_app
 from werkzeug.exceptions import abort
 from flaskr.auth import login_required
 from flaskr.db import get_db
 from datetime import date, datetime
+from flask_cors import cross_origin
 
 bp = Blueprint('blog', __name__)    
 
 @bp.route('/')
+@login_required(user_types=['user', 'admin'])
 def index():
     current_year = datetime.now().year
     cur = get_db().cursor()
@@ -19,9 +21,18 @@ def index():
     )
     productions = cur.fetchall()
     return render_template('blog/index.html', productions=productions)
-    
+
+@bp.route('/getdata', methods=('GET',))
+@cross_origin()
+def get_data():
+    data = jsonify(
+        name='mico',
+        age=16
+    )
+    return data
+
 @bp.route('/create', methods=('GET', 'POST'))
-@login_required()
+@login_required(user_types=['user', 'admin'])
 def create():
     if request.method == 'POST':
         title = request.form['title']
