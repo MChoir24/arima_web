@@ -1,14 +1,16 @@
 {% extends 'base.html' %}
 
 {% block header %}
-    <h1>{% block title %}Post{% endblock %}</h1>
-    {% if g.user %}
-        <a href="{{ url_for('blog.create') }}" class="action">New</a>
-    {% endif %}
+    <h1>{% block title %}Dashboard{% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
     {% for produksi in productions %}
-        {{ (produksi[1].strftime) }}
+        {{ produksi[1] }} <br>
     {% endfor %}
+    <p id="data" hidden>{{productions}}</p>
+    <script>
+        let data = document.getElementById('data').textContent;
+        console.log(data)
+    </script>
 {% endblock %}
