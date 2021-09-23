@@ -1,19 +1,18 @@
 {% extends 'base.html' %}
 
 {% block header %}
-    {% block title %}Dashboard{% endblock %}
+    {% block title %}Data Garam{% endblock %}
 {% endblock %}
 
-{% block dashboard_nav %}
+{% block data_nav %}
     active
-{% endblock dashboard_nav %}
+{% endblock data_nav %}
 
 {% block content %}
-    <p id="datas" hidden>{% for produksi in productions %}{{ produksi['nilai'] }},{% endfor %}</p>
-
+    
     <!-- Pilih tahun -->
 
-    <div class="row mb-2 ">
+    <div class="row mb-2">
         <div class="col">
             <form
                 class="d-none d-sm-inline-block form-inline mr-auto my-2 my-md-0 mw-100 navbar-search">
@@ -36,8 +35,25 @@
 
     <!-- table -->
     <div class="card shadow mb-4">
-        <div class="card-header py-3">
+        <div class="card-header py-3 d-flex justify-content-between">
             <h6 class="m-0 font-weight-bold text-primary">Data tahun {{cur_year}}</h6>
+
+            {# DropDown Aksi Table #}
+            <div class="dropdown no-arrow">
+                <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                    aria-labelledby="dropdownMenuLink">
+                    <div class="dropdown-header">Aksi</div>
+                    <a class="dropdown-item" href="{{ url_for('blog.import_data') }}">Import data (*.csv)</a>
+                    <a class="dropdown-item" href="{{ url_for('blog.data_garam_update', year=cur_year) }}">Ubah data</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Hapus Data</a>
+                </div>
+            </div>
+            
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -61,29 +77,6 @@
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
-
-    <!-- grafik -->
-    <div class="row justify-content-center">
-
-        <div class="col-8">
-
-            <!-- Area Chart -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Area Chart</h6>
-                </div>
-                <div class="card-body">
-                    <div class="chart-area">
-                        <canvas id="myAreaChart"></canvas>
-                    </div>
-                    <hr>
-                    Styling for the area chart can be found in the
-                    <code>/js/demo/chart-area-demo.js</code> file.
-                </div>
-            </div>
-
         </div>
     </div>
 

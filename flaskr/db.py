@@ -16,7 +16,7 @@ def get_db():
                             port=6033,
                             user="root",
                             password="root",
-                            database="arima"
+                            database="arima",
                         )
 
         g.db = mydb

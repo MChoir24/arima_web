@@ -7,6 +7,7 @@ from flask import (
 from werkzeug.security import check_password_hash, generate_password_hash
 from flaskr.db import get_db
 from flaskr.admin import create_user
+# import blog
 
 def login_required(user_types=['user']):
     def decor(view):
@@ -85,7 +86,7 @@ def login():
 @bp.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('index'))
+    return redirect('/')
 
 @bp.before_app_request
 def load_logged_in_user():

@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  {% block title %}Edit{% endblock %}
+{% endblock %}
+
+{% block content %}
+<form action="" method="post">
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">Data tahun {{year}}</h6>
+            <button type="submit" class="d-sm-inline-block btn btn-success shadow-sm">
+                <i class="fas fa-check fa-sm text-white-50"></i> Simpan
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Periode (Tahun/Bulan)</th>
+                            <th>Produksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for produksi in productions %}
+                        <tr>
+                            <th>{{ loop.index }}</th>
+                            <th>
+                                <input type="text" name="id{{loop.index}}" id="" value="{{ produksi['id'] }}" hidden>
+                                <input type="text" class="inputstyle" name="year{{loop.index}}" value="{{produksi['years']}}"> 
+                                /
+                                <input type="text" class="inputstyle" name="month{{loop.index}}" value="{{ produksi['months'] }}">
+                            </th>
+                            {# <th>{{ produksi[1] }} / {{ produksi[2] }}</th> #}
+                            <th><input type="text" class="inputstyle" name="nilai{{loop.index}}" value="{{produksi['nilai']}}"></th>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</form>
+{% endblock %}
