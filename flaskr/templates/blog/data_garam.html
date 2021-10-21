@@ -68,9 +68,9 @@
                     <tbody>
                         {% for produksi in productions %}
                         <tr>
-                            <th>{{ loop.index }}</th>
-                        <th> {{ produksi['years'] }} / {{ produksi['months'] }} </th>
-                            <th> {{ produksi['nilai'] }} </th>
+                            <td>{{ loop.index }}</td>
+                        <td> {{ produksi['years'] }} / {{ produksi['months'] }} </td>
+                            <td> {{ produksi['nilai'] }} </td>
                         </tr>
                         {% endfor %}
 

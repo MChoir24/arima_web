@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    {% block title %}Peramalan{% endblock %}
+{% endblock %}
+
+{% block peramalan_nav %}
+    active
+{% endblock peramalan_nav %}
+
+{% block content %}
+
+    <!-- Pilih tahun -->
+
+    <div class="row mb-2">
+        <div class="col">
+            <form
+                class="d-none d-sm-inline-block form-inline mr-auto my-2 my-md-0 mw-100 navbar-search">
+                <div class="input-group">
+                    <select class="custom-select form-control border-1 small" id="year" name="year">
+                        <option selected value="{{cur_year}}">Pilih Tahun</option>
+                        {% for year in years %}
+                            <option value="{{ year }}"> {{year}} </option>
+                        {% endfor %}
+                    </select>
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-search fa-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <form action="" method="post">
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Data tahun {{cur_year}}</h6>
+                <a href="{{ url_for('blog.tambah_tahun') }}"
+                    class="d-sm-inline-block btn btn-success shadow-sm {% if disabled_tambah_tahun == 'true' %}disabled{% endif %}" 
+                    role="button" 
+                    aria-disabled="{{disabled_tambah_tahun}}">
+                        <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Tahun ({{years[-1] + 1}})
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Periode (Tahun/Bulan)</th>
+                                <th>Produksi (Peramalan)</th>
+                                <th>Produksi (Asli)</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set len_prod = productions|length %}
+                            {% for produksi, ramal in productions|zip(peramalan)%}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>
+                                    <input type="text" name="id{{loop.index}}" id="" value="{{ produksi['id'] }}" hidden>
+                                    {{produksi['years']}}
+                                    /
+                                    {{ produksi['months'] }}
+                                </td>
+                                <td>{{ramal['nilai']}}</td>
+                                {# <td>{{ produksi[1] }} / {{ produksi[2] }}</td> #}
+                                <td><input type="text" class="inputstyle" name="nilai{{loop.index}}" value="{{produksi['nilai']}}" disabled></td>
+                                <td> 
+                                    {% if loop.index == len_prod and is_last_year %}
+                                    <a href="{{ url_for('blog.hapus_data', id=produksi['id']) }}" 
+                                        name="delete" 
+                                        class="d-sm-inline-block btn btn-danger shadow-sm" 
+                                        role="button">
+                                            <i class="fas fa-edit fa-sm text-white-50"></i> Hapus
+                                    </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {# jika data kurang dari 12 #}
+                            {% if len_prod < 12 %}
+                                {% set next_i = len_prod + 1 %}
+                                <tr>
+                                    <td>{{ next_i }}</td>
+                                    <td>
+                                        {{ cur_year }}
+                                        /
+                                        {{ next_i }}
+                                    </td>
+                                    <td>{{peramalan[next_i-1]['nilai']}}</td>
+                                        <input type="text" name="periode" value="{{cur_year}}-{{next_i}}-01" hidden>
+                                    <td><input type="text" class="inputstyle" name="nilai" value=""></td>
+                                    <td>
+                                        <button type="submit" class="d-sm-inline-block btn btn-success shadow-sm">
+                                            <i class="fas fa-check fa-sm text-white-50"></i> Simpan
+                                        </button>
+                                    </td>
+                                </tr>
+
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </form>
+
+    <!-- grafik -->
+    <p id="datas" hidden>{% for ramalan in peramalan %}{{ ramalan['nilai'] }},{% endfor %}</p>
+    <div class="row justify-content-center">
+
+        <div class="col-8">
+
+            <!-- Area Chart -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Area Chart</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="myAreaChart"></canvas>
+                    </div>
+                    <hr>
+                    Styling for the area chart can be found in the
+                    <code>/js/demo/chart-area-demo.js</code> file.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+{% endblock content %}

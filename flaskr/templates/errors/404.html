@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    {% block title %}Data Garam{% endblock %}
+{% endblock %}
+
+
+{% block content %}
+    <div class="row mb-2">
+        <div class="col">
+            <form
+                class="d-none d-sm-inline-block form-inline mr-auto my-2 my-md-0 mw-100 navbar-search">
+                <div class="input-group">
+                    <select class="custom-select form-control border-1 small" id="year" name="year">
+                        <option selected value="{{cur_year}}">Pilih Tahun</option>
+                        {% for year in years %}
+                            <option value="{{ year }}"> {{year}} </option>
+                        {% endfor %}
+                    </select>
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-search fa-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+<p>Data tidak ditemukan <a href="{{url_for('blog.import_data')}}">Import data garam pertahun.</a></p>
+{{e}}
+{% endblock content %}

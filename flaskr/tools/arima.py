@@ -4,37 +4,64 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 def perkiraan_arima(train,test,order):
+  
+  #print('test =', test.values)
+  #print(type(test))
+  history = [x for x in train]
+  #print(train.shape,test.shape)
+  #prediksi
+  prediksi = []
+  for t in range(len(test)):
+    model = ARIMA(history, order = order)
+    model_fit = model.fit()
+    output = model_fit.forecast()
+    yhat = output[0][0]
+    rel = max((0,yhat))
+    # print('outputnya', output)
+    prediksi.append(rel)
+    obs = test.values[t]
+    history.append(obs)
+    # print('predicted=%f, expected=%f' % (rel, obs))
+  return (prediksi,history)
+
+def perkiraan_arima2(train, times, order):
     #print('test =', test.values)
     #print(type(test))
     history = [x for x in train]
     #print(train.shape,test.shape)
     #prediksi
     prediksi = []
-    for t in range(len(test)):
+    length = 8 * times
+    for t in range(length):
         model = ARIMA(history, order = order)
         model_fit = model.fit()
         output = model_fit.forecast()
         yhat = output[0][0]
         rel = max((0,yhat))
+        print("Prediksi: ", rel)
+        obs = int(input('masukan dulu data bulan sekarang: '))
+        history.append(obs)
         #print('outputnya', output)
         prediksi.append(rel)
-        obs = test.values[t]
-        history.append(obs)
     #print('predicted=%f, expected=%f' % (rel, obs))
     return (prediksi,history)
 
 if __name__ == '__main__':
     DATA_PATH = '/home/choir/Downloads/data_bulanan2.csv'
     produksi = pd.read_csv(DATA_PATH)
+    print(produksi)
     # produksi.plot()
     # plt.show()
     train = produksi['Produksi'][:60]
     test = produksi['Produksi'][60:]
     order = (1,2,0)
     
-    prediksi, history = perkiraan_arima(train=train, test=test, order=order)
+    # prediksi , _= perkiraan_arima(train=train, test=test, order=order)
+    prediksi, _ = perkiraan_arima2(train=train, times=2, order=order)
+
     
     predic = pd.Series(prediksi)
+    print('predic=', predic)
     test2 = test.reset_index(drop=True)
     
     fig, ax = plt.subplots()

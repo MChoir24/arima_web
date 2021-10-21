@@ -13,6 +13,7 @@ def create_app(test_config=None):
         SECRET_KEY='dev',
         DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
     )
+    app.jinja_env.filters['zip'] = zip
     # app.config['MYSQL_DATABASE_HOST'] = "127.0.0.1"
     # app.config['MYSQL_DATABASE_PORT'] = 6033
     # app.config['MYSQL_DATABASE_USER'] = "root"

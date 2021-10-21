@@ -9,8 +9,6 @@
 {% endblock dashboard_nav %}
 
 {% block content %}
-    <p id="datas" hidden>{% for produksi in productions %}{{ produksi['nilai'] }},{% endfor %}</p>
-
     <!-- Pilih tahun -->
 
     <div class="row mb-2 ">
@@ -52,9 +50,9 @@
                     <tbody>
                         {% for produksi in productions %}
                         <tr>
-                            <th>{{ loop.index }}</th>
-                        <th> {{ produksi['years'] }} / {{ produksi['months'] }} </th>
-                            <th> {{ produksi['nilai'] }} </th>
+                            <td>{{ loop.index }}</td>
+                        <td> {{ produksi['years'] }} / {{ produksi['months'] }} </td>
+                            <td> {{ produksi['nilai'] }} </td>
                         </tr>
                         {% endfor %}
 
@@ -65,6 +63,7 @@
     </div>
 
     <!-- grafik -->
+    <p id="datas" hidden>{% for produksi in productions %}{{ produksi['nilai'] }},{% endfor %}</p>
     <div class="row justify-content-center">
 
         <div class="col-8">

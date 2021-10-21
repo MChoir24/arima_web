@@ -54,7 +54,7 @@
 
             {# Peramalan #}
             <li class="nav-item {% block peramalan_nav %}{% endblock peramalan_nav %}">
-                <a class="nav-link" href="/">
+                <a class="nav-link" href="{{ url_for('blog.peramalan') }}">
                     <i class="fas fa-fw fa-magic"></i>
                     
                     <span>Peramalan</span></a>
@@ -67,6 +67,16 @@
                     
                     <span>Data Garam</span></a>
             </li>
+
+            {# Users #}
+            {% if g.user['type'] == 'admin' %}
+            <li class="nav-item {% block users_nav %}{% endblock users_nav %}">
+                <a class="nav-link" href="{{ url_for('blog.users') }}">
+                    <i class="fas fa-fw fa-users"></i>
+                    
+                    <span>Users</span></a>
+            </li>
+            {% endif %}
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
