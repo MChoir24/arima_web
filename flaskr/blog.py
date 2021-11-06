@@ -1,11 +1,11 @@
 from flask import (
     Blueprint, flash, g, json, redirect, render_template, request, url_for, jsonify, send_file
 )
+from .tools.arima import perkiraan_arima
+from .tools.fun import get_years, get_datas, generate_id, insert_datas
 from flask.globals import current_app
 from flaskr.auth import login_required
 from flaskr.db import get_db
-from flaskr.tools.arima import perkiraan_arima
-from flaskr.tools.fun import get_years, get_datas, generate_id, insert_datas
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
 from datetime import datetime, date
@@ -17,12 +17,11 @@ import numpy as np
 import pandas as pd
 
 
-
-CURRENT_YEAR = datetime.now().year
-
-
 # routes
 bp = Blueprint('blog', __name__)
+
+
+# get_years()[-1] = get_years()[-1]
 
 # ''' Dashboard '''
 @bp.route('/')
@@ -30,7 +29,7 @@ bp = Blueprint('blog', __name__)
 def index():
     years = get_years()
 
-    cur_year = request.args.get('year', CURRENT_YEAR)
+    cur_year = request.args.get('year', get_years()[-1])
     
     productions = get_datas(year=cur_year)
     if not productions:
@@ -95,11 +94,13 @@ def peramalan():
 
         return redirect(url_for('blog.peramalan', year=years[-1]))
 
-    cur_year = request.args.get('year', CURRENT_YEAR)
+    cur_year = request.args.get('year', get_years()[-1])
     productions = get_datas(cur_year)
     peramalan = get_datas(cur_year, table='hasil_peramalan')
     if not productions and not peramalan:
         abort(404, f"Kata kunci {cur_year} tidak cocok!.")
+    if not peramalan:
+        peramalan = np.zeros((12))
 
     if len(get_datas(years[-1])) == 12:
         disabled_tambah_tahun = 'false'
@@ -134,7 +135,38 @@ def tambah_tahun():
 @bp.route('/hapus-data')
 @login_required(user_types=['user', 'admin'])
 def hapus_data():
-    pass
+    periode = request.args.get('periode', 0)
+    id_periode = generate_id(periode)
+
+    date_obj = datetime.strptime(periode, '%Y-%m-%d')
+    year = date_obj.year
+    next_periode = (date_obj + relativedelta(months=1)).date()
+    id_peramalan = generate_id(str(next_periode))
+    # return f'{periode} -> {str(next_periode)}'
+
+
+    last_year = get_years(table='produksi')[-1]
+    last_data = get_datas(last_year, table='produksi')[-1]
+
+    if int(id_periode) != last_data['id']: # delete data when id from request is equal with last id from db
+        abort(403)
+
+    db = get_db()
+    cur = db.cursor()
+    try:
+        cur.execute('DELETE FROM produksi WHERE id = %s', (id_periode,))
+        cur.execute('DELETE FROM hasil_peramalan WHERE id = %s', (id_peramalan,))
+        db.commit()
+    except Error as er:
+        print(er)
+        db.rollback()
+        return f'None, {er}'
+    except BaseException as er:
+        print(f'something erclose_dbror: {er}')
+        return str(er)
+    
+    return redirect(url_for('blog.peramalan', year=year))
+    # return 'sama'
 
 
 # ''' Data Garam '''
@@ -143,7 +175,7 @@ def hapus_data():
 def data_garam():
     years = get_years()
 
-    cur_year = request.args.get('year', CURRENT_YEAR)
+    cur_year = request.args.get('year', get_years()[-1])
 
     productions = get_datas(year=cur_year)
     if productions is None:
@@ -154,6 +186,39 @@ def data_garam():
         years=years, 
         cur_year=cur_year
         )
+
+@bp.route('/hapus-data-tahun')
+@login_required(user_types=['user', 'admin'])
+def hapus_data_tahun():
+    year_produksi = int(request.args.get('year', 0))
+    
+    # validasi
+    last_year = get_years(table='produksi')[-1]
+    if year_produksi != last_year:
+        abort(403)
+    
+    db = get_db()
+    cur = db.cursor()
+    try:
+        cur.execute("DELETE FROM produksi WHERE WHERE `periode` LIKE '%s%';", (year_produksi,))
+        cur.execute("DELETE FROM hasil_peramalan WHERE `periode` LIKE '%s%';", (year_produksi,))
+        cur.execute("DELETE FROM hasil_peramalan WHERE `periode` LIKE '%s%';", (year_produksi+1),)
+
+        db.commit()
+    except Error as er:
+        print(er)
+        db.rollback()
+        return f'None, {er}'
+    except BaseException as er:
+        print(f'something erclose_dbror: {er}')
+        return str(er)
+
+    periode = f'{year_produksi}-01-01'
+    insert_datas((periode, 0), table='hasil_peramalan')
+
+    return redirect(url_for('blog.peramalan', year=year_produksi))
+
+
 
 @bp.route('/create', methods=('GET', 'POST'))
 @login_required(user_types=['user', 'admin'])
@@ -319,15 +384,15 @@ def users():
     )
 
 
-@bp.route('/<int:id>/delete', methods=('POST',))
-@login_required()
-def delete(id):
-    get_post(id)
-    db = get_db()
-    cur = db.cursor()
-    cur.execute('DELETE FROM post WHERE id = %s', (id,))
-    db.commit()
-    return redirect(url_for('blog.index'))
+# @bp.route('/<int:id>/delete', methods=('POST',))
+# @login_required()
+# def delete(id):
+#     get_post(id)
+#     db = get_db()
+#     cur = db.cursor()
+#     cur.execute('DELETE FROM post WHERE id = %s', (id,))
+#     db.commit()
+#     return redirect(url_for('blog.index'))
 
 @bp.errorhandler(404)
 def not_found(e):

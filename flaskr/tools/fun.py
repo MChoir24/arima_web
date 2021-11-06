@@ -15,10 +15,14 @@ def get_years(table='produksi'):
     years = cur.fetchall() # [(col1), (col2), (col3), ..., (coln)]
     years = np.reshape(years, (-1))
     years.sort() # sorted
+    if len(years) == 0:
+        years = [0,]
     return years
 
 def get_datas(year, table='produksi'):
     cur = get_db().cursor(dictionary=True)
+
+    years = get_years(table)
     
     try:    
         # ambil data berdasarkan tahun
@@ -29,9 +33,11 @@ def get_datas(year, table='produksi'):
         return cur.fetchall()
     except ValueError as er:
         return None
+    except IndexError as er:
+        return None
 
 def generate_id(periode):
-    periode_date = datetime.strptime(periode, '%Y-%m-%d')
+    periode_date = datetime.strptime(periode, '%Y-%m-%d')   
     ls_periode = str(periode_date).split('-')
 
     id = ls_periode[0] + ls_periode[1]
