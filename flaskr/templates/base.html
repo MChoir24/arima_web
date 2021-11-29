@@ -34,10 +34,9 @@
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
             <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
-                <div class="sidebar-brand-icon">
-                    <i class="fas fa-meh"></i>
-                </div>
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">  
+                <img src="{{url_for('static',filename='img/Logo.png')}}" class="img">  
+                <span>PT. GARAM (Persero)</span> 
             </a>
 
             <!-- Divider -->
@@ -159,7 +158,7 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Douglas McGee</span>
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ g.user['type'] }}</span>
                                 <img class="img-profile rounded-circle"
                                     src="{{ url_for('static', filename='img/undraw_profile.svg') }}">
                             </a>
@@ -197,8 +196,6 @@
                     <!-- Page Heading -->
                     <div class="d-flex align-items-center justify-content-between mb-4">
                         <h1 class="h3 mb-0 text-gray-800">{% block header %}{% endblock %}</h1>
-                        <a href="#" class=" d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                                class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
                     </div>
                     {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}

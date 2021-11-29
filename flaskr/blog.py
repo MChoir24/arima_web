@@ -341,6 +341,7 @@ def import_data():
             filepath = os.path.join(UPLOAD_FOLDER, filename); 
             filepath_new = os.path.join(UPLOAD_FOLDER, 'data.csv'); 
             file.save(filepath)
+            os.remove(filepath_new) if os.path.exists(filepath_new) else None # remove file if data.csv si already exist
             os.rename(filepath, os.path.join(UPLOAD_FOLDER, 'data.csv'))
         
             filename = filepath_new
