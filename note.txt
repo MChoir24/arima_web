@@ -3,3 +3,4 @@ import data:
     kondisi jika upload tahun yang sama
     validasi extensi file
     
+Hilangkan info selain logout
