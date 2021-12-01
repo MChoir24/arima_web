@@ -534,6 +534,43 @@ def ubah_password(id):
 
     return render_template('blog/ubah_password.html', id=id)
 
+@bp.route('/user/<id>/delete')
+@login_required(user_types=['admin'])
+def hapus_user(id):
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+
+    # validasi jika user admin <= 1 tidak dapat dihapus
+    cur.execute(
+        'SELECT id, user.id_type FROM user WHERE id = %s',
+        (id, )
+    )
+    user = cur.fetchone()
+    
+    cur.execute(
+        'SELECT id, user.username, user.id_type, user_type.type_name FROM user_type INNER JOIN user ON user_type.id_type = user.id_type where user_type.id_type = %s',
+        (user['id_type'],)
+        )
+    users = cur.fetchall()
+    # return jsonify(type(user['id_type']))
+    # print('-------------', type(user['id_type']))
+    if (len(users) < 2 and user['id_type'] == 1) or user['id'] == g.user['id']:
+        flash('tidak dapat menghapus user yang dipilih.', 'danger')
+        return redirect(url_for('blog.users'))
+
+    try:
+        cur.execute('DELETE FROM user WHERE id = %s', (id,))
+        db.commit()
+    except Error as er:
+        print(er)
+        db.rollback()
+        return f'None, {er}'
+    except BaseException as er:
+        print(f'something erclose_dbror: {er}')
+        return str(er)
+
+    return redirect(url_for('blog.users'))
+
 
 # @bp.route('/<int:id>/delete', methods=('POST',))
 # @login_required()

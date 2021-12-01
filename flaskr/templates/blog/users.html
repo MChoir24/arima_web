@@ -31,10 +31,35 @@
                         <tr>
                             <td>{{ loop.index }}</td>
                             <td> {{ user['username'] }}</td>
-                            <td> {{ user['type_name'] }} </td>
+                            <td> {{ user['type_name'] }} {% if user['id'] == g.user['id'] %}(Sedang Login){% endif %} </td>
                             <td> 
                                 <a href="{{ url_for('blog.edit_user', id=user['id']) }}" class="btn btn-success">Ubah</a> 
                                 <a href="{{ url_for('blog.ubah_password', id=user['id']) }}" class="btn btn-warning">Ubah Password</a>
+                                {% if user['id'] == g.user['id'] %}
+                                
+                                {% else %}
+                                <a href="#" class="btn btn-danger" data-toggle="modal" data-target="#hapusUser{{ loop.index }}">Hapus User</a>
+                                <div class="modal fade" id="hapusUser{{ loop.index }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+                                    aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLabel">Konfirmasi hapus user</h5>
+                                                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">×</span>
+                                                </button>
+                                            </div>
+
+                                            <div class="modal-body">Data yang dipilih akan dihapus permanen</div>
+                                            <div class="modal-footer">
+                                                <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
+                                                <a class="btn btn-primary" href="{{url_for('blog.hapus_user', id=user['id'])}}">Hapus</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
