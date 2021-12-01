@@ -4,13 +4,15 @@ from flask import (
 from .tools.arima import perkiraan_arima
 from .tools.fun import get_years, get_datas, generate_id, insert_datas
 from flask.globals import current_app
-from flaskr.auth import login_required
+from flaskr.auth import login, login_required
 from flaskr.db import get_db
 from werkzeug.exceptions import abort
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 from mysql.connector import Error
+
 
 import os
 import numpy as np
@@ -375,14 +377,162 @@ def download_file():
 def users():
     cur = get_db().cursor(dictionary=True)
     cur.execute(
-        "SELECT id, username, id_type FROM user"
+        "SELECT id, user.username, user.id_type, user_type.type_name FROM user INNER JOIN user_type ON user.id_type = user_type.id_type"
     )
     users = cur.fetchall()
-    
+    # return jsonify(users)
     return render_template(
         'blog/users.html',
         users=users
     )
+
+@bp.route('/users/add-user', methods=('GET', 'POST'))
+@login_required(user_types=['admin'])
+def add_user():
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+
+    if request.method == 'POST':
+        # get request
+        username = request.form['username']
+        password = request.form['password']
+        id_type = request.form['id_type']
+
+        cur = db.cursor()
+
+        # get all users for validation
+        cur.execute("select * from user where username=%s", (username,))
+        users = cur.fetchone()
+
+        # validations
+        if username == '' or password == '':
+            flash("Isian tidak boleh kosong", "danger")
+            return redirect(url_for('blog.add_user'))
+
+        if users:
+            if username in users:
+                flash("Username sudah tersedia.", "danger")
+                return redirect(url_for('blog.add_user'))
+                
+
+        try:
+            cur.execute(
+                "insert into user (username, password, id_type) values (%s, %s, %s)",
+                (username, generate_password_hash(password), id_type)
+            )
+            db.commit()
+        except Error as er:
+            print(er)
+            db.rollback()
+            error = f'Terjadi kesalahan saat menambah data.'
+            flash(error, 'danger')
+            return redirect(url_for('blog.users'))
+        
+        return redirect(url_for('blog.users'))
+
+    # get all type
+    cur.execute('select * from user_type where 1')
+    user_type = cur.fetchall()
+
+    return render_template(
+        'blog/add_user.html',
+        user_type = user_type
+        )
+
+@bp.route('/users/<id>', methods=('GET', 'POST'))
+@login_required(user_types=['admin'])
+def edit_user(id):
+    # if METHOD POST
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+
+    cur.execute(
+        "SELECT id, username, id_type FROM user WHERE id = %s",
+        (id,)
+    )
+    user = cur.fetchone()
+
+    if request.method == 'POST':
+        # get request
+        id = request.form['id']
+        username = request.form['username']
+        id_type = request.form['id_type']
+
+        # get all users
+        # cur.execute('SELECT * FROM user WHERE 1')
+        # users = cur.fetchone()
+        # return jsonify(users)
+
+        # # validation
+        # if username != user['username']:
+        #     if username in users:
+        #         flash("Username telah digunakan", 'danger')
+        #         return redirect(url_for('blog.edit_user', user=user))
+        try:
+            # return jsonify([id, username, id_type])
+            cur = db.cursor()
+            cur.execute(
+                        "UPDATE user SET username = %s, id_type = %s WHERE id = %s",
+                        (username, id_type, id)
+                    )
+            db.commit()
+        except Error as er:
+            print(er)
+            db.rollback()
+            error = f'Terjadi kesalahan saat mengubah data.'
+            flash(error, 'danger')
+            return redirect(url_for('blog.users'))
+
+        return redirect(url_for('blog.users'))
+    # METHOD GET
+
+    cur.execute(
+        "SELECT * FROM user_type WHERE 1"
+    )
+    user_type = cur.fetchall()
+    # return jsonify(user)
+    return render_template(
+        'blog/edit_user.html',
+        user = user,
+        user_type = user_type
+    )
+
+@bp.route('/users/<id>/change-passwd', methods=['GET', 'POST'])
+@login_required(user_types=['admin'])
+def ubah_password(id):
+    db = get_db()
+    cur = db.cursor()
+
+    if request.method == 'POST':
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
+
+        # validation
+        if password == '':
+            flash('Isian harus diisi', 'danger')
+            return redirect(url_for('blog.ubah_password', id=id))
+
+        if password != confirm_password:
+            flash('Ulangi password.!', 'danger')
+            return redirect(url_for('blog.ubah_password', id=id))
+
+        try:
+            cur = db.cursor()
+            cur.execute(
+                        "UPDATE user SET password = %s WHERE id = %s",
+                        (generate_password_hash(password), id)
+                    )
+            db.commit()
+        except Error as er:
+            print(er)
+            db.rollback()
+            error = f'Terjadi kesalahan saat mengubah data.'
+            flash(error, 'danger')
+            return redirect(url_for('blog.users'))
+
+        return redirect(url_for('blog.users'))
+
+    return render_template('blog/ubah_password.html', id=id)
 
 
 # @bp.route('/<int:id>/delete', methods=('POST',))

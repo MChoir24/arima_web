@@ -4,6 +4,7 @@ import mysql.connector
 from flask.cli import with_appcontext
 # from flaskext.mysql import MySQL
 from flask import current_app, g
+from werkzeug.security import generate_password_hash
 
 
 def get_db():
@@ -36,8 +37,16 @@ def init_db():
     initialitation databese
     """
     db = get_db()
+    cur = db.cursor()
 
-    executeScriptsFromFile(db.cursor(), "schema2.sql")
+    executeScriptsFromFile(cur, "schema2.sql")
+
+    cur.execute(
+            "INSERT INTO user (username, password, id_type) VALUES (%s, %s, %s)",
+            ('admin', generate_password_hash('admin'), 1)
+        )
+    db.commit()
+
     # with current_app.open_resource('schema.sql') as f:
     #     db.executescript(f.read().decode('utf8'))
 

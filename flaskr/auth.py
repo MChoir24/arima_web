@@ -106,5 +106,5 @@ def load_logged_in_user():
         temp = cur.fetchone()
         g.user = {}
         g.user['id'] = temp[0]
-        g.user['name'] = temp[1]
+        g.user['username'] = temp[1]
         g.user['type'] = temp[2]

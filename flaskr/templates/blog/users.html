@@ -10,6 +10,39 @@
 
 {% block content %}
 
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="me-3 font-weight-bold text-primary d-inline">Daftar Users</h6>
+            <a href="{{url_for('blog.add_user')}}" class="btn btn-primary d-inline">Tambah User</a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Username</th>
+                            <th>Peran</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td> {{ user['username'] }}</td>
+                            <td> {{ user['type_name'] }} </td>
+                            <td> 
+                                <a href="{{ url_for('blog.edit_user', id=user['id']) }}" class="btn btn-success">Ubah</a> 
+                                <a href="{{ url_for('blog.ubah_password', id=user['id']) }}" class="btn btn-warning">Ubah Password</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
 
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
 {% endblock %}

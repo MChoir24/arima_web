@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block header %}
+    {% block title %}
+        Tambah User    
+    {% endblock title %}
+{% endblock header %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <form action="" method="POST">
+            <input type="text" name="id" value="" hidden>
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" name="username" class="form-control" id="username" value="" placeholder="">
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" name="password" class="form-control" id="password" value="" placeholder="">
+            </div>
+            <div class="mb-3">
+            <label for="select" class="form-label">Pilih Type</label>
+                <select class="form-select" name="id_type">
+                    {% for type in user_type %}
+                            <option value="{{type['id_type']}}">{{type['type_name']}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3 align-self-end">
+                <input type="submit" class="btn btn-primary" value="Simpan">
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock content %}
