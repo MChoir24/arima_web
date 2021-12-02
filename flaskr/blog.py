@@ -135,7 +135,7 @@ def tambah_tahun():
     return redirect(url_for('blog.peramalan', year=years[-1] + 1))
 
 @bp.route('/hapus-data')
-@login_required(user_types=['user', 'admin'])
+@login_required(user_types=['user'])
 def hapus_data():
     periode = request.args.get('periode', 0)
     id_periode = generate_id(periode)

@@ -72,13 +72,13 @@
                                 {# <td>{{ produksi[1] }} / {{ produksi[2] }}</td> #}
                                 <td><input type="text" class="inputstyle" name="nilai{{loop.index}}" value="{{produksi['nilai']}}" disabled></td>
                                 <td> 
-                                    {% if loop.index == len_prod and is_last_year %}
+                                    {% if loop.index == len_prod and is_last_year and g.user['type'] == 'user' %}
                                     {%set tgl = produksi['years']|string + '-' + produksi['months']|string + '-01'%}
                                     <a href="{{ url_for('blog.hapus_data', periode=tgl) }}" 
                                         name="delete" 
                                         class="d-sm-inline-block btn btn-danger shadow-sm" 
                                         role="button">
-                                            <i class="fas fa-trash fa-sm text-white-50"></i> Hapus 
+                                            <i class="fas fa-trash fa-sm text-white-50"></i> Hapus  
                                     </a>
                                     {% endif %}
                                 </td>
