@@ -29,13 +29,13 @@
                         <tr>
                             <th>{{ loop.index }}</th>
                             <th>
-                                <input type="text" name="id{{loop.index}}" id="" value="{{ produksi['id'] }}" hidden>
-                                <input type="text" class="inputstyle" name="year{{loop.index}}" value="{{produksi['years']}}" disabled> 
+                                <input type="text" class="inputstyle" name="year{{loop.index}}" value="{{produksi['years']}}" readonly> 
                                 /
-                                <input type="text" class="inputstyle" name="month{{loop.index}}" value="{{ produksi['months'] }}" disabled>
+                                <input type="text" class="inputstyle" name="month{{loop.index}}" value="{{ produksi['months'] }}" readonly>
                             </th>
                             {# <th>{{ produksi[1] }} / {{ produksi[2] }}</th> #}
                             <th><input type="text" class="inputstyle" name="nilai{{loop.index}}" value="{{produksi['nilai']}}"></th>
+                              	<input type="text" name="id{{loop.index}}" id="" value="{{ produksi['id'] }}" hidden>
                         </tr>
                         {% endfor %}
                     </tbody>

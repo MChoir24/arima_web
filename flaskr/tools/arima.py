@@ -31,7 +31,7 @@ def perkiraan_arima2(train, times, order):
     #print(train.shape,test.shape)
     #prediksi
     prediksi = []
-    length = 8 * times
+    length = 12 * times
     for t in range(length):
         model = ARIMA(history, order = order)
         model_fit = model.fit()

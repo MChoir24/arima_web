@@ -202,9 +202,8 @@ def hapus_data_tahun():
     db = get_db()
     cur = db.cursor()
     try:
-        cur.execute("DELETE FROM produksi WHERE WHERE `periode` LIKE '%s%';", (year_produksi,))
-        cur.execute("DELETE FROM hasil_peramalan WHERE `periode` LIKE '%s%';", (year_produksi,))
-        cur.execute("DELETE FROM hasil_peramalan WHERE `periode` LIKE '%s%';", (year_produksi+1),)
+        cur.execute("DELETE FROM produksi WHERE `periode` LIKE '%s%';", (year_produksi,))
+        cur.execute("DELETE FROM hasil_peramalan WHERE `periode` LIKE '%s%' or `periode` LIKE '%s%';", (year_produksi,year_produksi+1))
 
         db.commit()
     except Error as er:
@@ -259,7 +258,7 @@ def data_garam_update(year):
         abort(404, f"Maaf, kata kunci {year} tidak cocok!.")
 
     if request.method == 'POST':
-        # return jsonify(len(request.form))
+        #return jsonify(request.form)
         form = request.form
         for i in range(1, (len(form)//4) + 1):
             id = request.form[f'id{i}']
