@@ -3,7 +3,7 @@ from statsmodels.tsa.arima_model import ARIMA
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def perkiraan_arima(train,test,order):
+def perkiraan_arima_(train,test,order):
   
   #print('test =', test.values)
   #print(type(test))
@@ -24,49 +24,38 @@ def perkiraan_arima(train,test,order):
     # print('predicted=%f, expected=%f' % (rel, obs))
   return (prediksi,history)
 
-def perkiraan_arima2(train, times, order):
-    #print('test =', test.values)
-    #print(type(test))
+def perkiraan_arima(train, order):
     history = [x for x in train]
-    #print(train.shape,test.shape)
     #prediksi
-    prediksi = []
-    length = 12 * times
-    for t in range(length):
-        model = ARIMA(history, order = order)
-        model_fit = model.fit()
-        output = model_fit.forecast()
-        yhat = output[0][0]
-        rel = max((0,yhat))
-        print("Prediksi: ", rel)
-        obs = int(input('masukan dulu data bulan sekarang: '))
-        history.append(obs)
-        #print('outputnya', output)
-        prediksi.append(rel)
-    #print('predicted=%f, expected=%f' % (rel, obs))
-    return (prediksi,history)
+    model = ARIMA(history, order = order)
+    model_fit = model.fit()
+    output = model_fit.forecast()
+    yhat = output[0][0]
+    rel = max((0,yhat))
+    print("Prediksi: ", rel)
+    return rel
 
 if __name__ == '__main__':
-    DATA_PATH = '/home/choir/Downloads/data_bulanan2.csv'
+    DATA_PATH = '/home/choir/Downloads/data_train.csv'
     produksi = pd.read_csv(DATA_PATH)
     print(produksi)
     # produksi.plot()
     # plt.show()
-    train = produksi['Produksi'][:60]
+    train = produksi['Produksi'][:61]
     test = produksi['Produksi'][60:]
     order = (1,2,0)
     
     # prediksi , _= perkiraan_arima(train=train, test=test, order=order)
-    prediksi, _ = perkiraan_arima2(train=train, times=2, order=order)
+    prediksi = perkiraan_arima(train=train, order=order)
 
     
-    predic = pd.Series(prediksi)
-    print('predic=', predic)
-    test2 = test.reset_index(drop=True)
+    # predic = pd.Series(prediksi)
+    # print('predic=', predic)
+    # test2 = test.reset_index(drop=True)
     
-    fig, ax = plt.subplots()
-    ax.plot(test2, label="test")
-    ax.plot(predic, label="prediksi")
-    ax.legend()
+    # fig, ax = plt.subplots()
+    # ax.plot(test2, label="test")
+    # ax.plot(predic, label="prediksi")
+    # ax.legend()
 
-    plt.show()
+    # plt.show()

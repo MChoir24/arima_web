@@ -45,6 +45,7 @@ def index():
 
 # ''' Peramalan '''
 
+ORDER = (1,2,0)
 def insert_peramalan(periode): # insert data peramalan ke database
     list_periode = periode.split('-')
     year = int(list_periode[0])
@@ -52,13 +53,14 @@ def insert_peramalan(periode): # insert data peramalan ke database
     print('============', year)
     print('============', month)
 
-    productions = get_datas(year, table='produksi')
+    productions = get_datas(table='produksi', dictionary=False)
+    productions = np.array(productions)
     print(productions)
     nilai = 0
     if month > 4: # mulai meramal pada bulan 5 (mei)
         print('len produksi, ', len(productions))
-        nilai_real = productions[-1]['nilai']
-        nilai = np.random.normal(loc=nilai_real)
+        train = productions[:, 3]
+        nilai = perkiraan_arima(train, ORDER)
 
     insert_datas((periode, nilai), table='hasil_peramalan')
 
@@ -69,6 +71,7 @@ def peramalan():
     disabled_tambah_tahun = 'true'
     is_last_year = False
 
+    # POST
     if request.method == 'POST': # tambah data per bulan
         periode = request.form['periode']
         nilai = request.form['nilai']
@@ -96,6 +99,7 @@ def peramalan():
 
         return redirect(url_for('blog.peramalan', year=years[-1]))
 
+    # GET
     cur_year = request.args.get('year', get_years()[-1])
     productions = get_datas(cur_year)
     peramalan = get_datas(cur_year, table='hasil_peramalan')
@@ -217,7 +221,7 @@ def hapus_data_tahun():
     periode = f'{year_produksi}-01-01'
     insert_datas((periode, 0), table='hasil_peramalan')
 
-    return redirect(url_for('blog.peramalan', year=year_produksi))
+    return redirect(url_for('blog.data_garam'))
 
 
 
@@ -340,13 +344,9 @@ def import_data():
         else:
             filename = secure_filename(file.filename)
             filepath = os.path.join(UPLOAD_FOLDER, filename); 
-            filepath_new = os.path.join(UPLOAD_FOLDER, 'data.csv'); 
             file.save(filepath)
-            os.remove(filepath_new) if os.path.exists(filepath_new) else None # remove file if data.csv si already exist
-            os.rename(filepath, os.path.join(UPLOAD_FOLDER, 'data.csv'))
-        
-            filename = filepath_new
-            datas = pd.read_csv(filename, index_col=False, delimiter=';')
+            
+            datas = pd.read_csv(filepath, index_col=False, delimiter=';')
 
             # validasi tahun yang sudah ada.
             tahun_data = int(datas.values[0, 0][:4])
@@ -359,6 +359,7 @@ def import_data():
                 inserted = insert_datas(datas, table='produksi')
                 print(inserted)
                 
+            os.remove(filepath)
             flash(f'Berhasil import data tahun {tahun_data}!', 'success')
             return redirect(url_for('blog.data_garam', year=tahun_data))
 

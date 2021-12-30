@@ -19,17 +19,22 @@ def get_years(table='produksi'):
         years = [0,]
     return years
 
-def get_datas(year, table='produksi'):
-    cur = get_db().cursor(dictionary=True)
+def get_datas(year=None, table='produksi', dictionary=True):
+    cur = get_db().cursor(dictionary=dictionary)
 
     years = get_years(table)
     
     try:    
         # ambil data berdasarkan tahun
-        cur.execute(
-            f"SELECT id, year(periode) AS years, month(periode) AS months, nilai FROM `{table}` WHERE `periode` LIKE '%s%'",
-            (int(year),)
-        )
+        if year is not None:
+            cur.execute(
+                f"SELECT id, year(periode) AS years, month(periode) AS months, nilai FROM `{table}` WHERE `periode` LIKE '%s%'",
+                (int(year),)
+            )
+        else:
+            cur.execute(
+                f"SELECT id, year(periode) AS years, month(periode) AS months, nilai FROM `{table}`"
+            )
         return cur.fetchall()
     except ValueError as er:
         return None

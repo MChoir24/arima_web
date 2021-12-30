@@ -14,9 +14,9 @@ def get_db():
     if 'db' not in g:
         mydb = mysql.connector.connect(
                             host="localhost",
-                            port=3306,
+                            port=6033,
                             user="root",
-                            password="",
+                            password="root",
                             database="arima",
                         )
 
